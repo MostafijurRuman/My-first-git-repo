@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            text-align: center;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        .board {
+            display: grid;
+            grid-template-columns: repeat(3, 100px);
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .cell {
+            width: 100px;
+            height: 100px;
+            border: 2px solid #333;
+            font-size: 2em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .cell:hover {
+            background-color: #ddd;
+        }
+
+        #scoreboard {
+            margin-top: 20px;
+        }
+
+        #scoreboard span {
+            margin: 0 10px;
+            color: #333;
+        }
+
+        .popup {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        #game-over-popup {
+            flex-direction: column;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+
+        #restart-button {
+            background-color: #4caf50;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            font-size: 1em;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        #restart-button:hover {
+            background-color: #45a049;
+        }
+    </style>
+    <title>Tic Tac Toe</title>
+</head>
+<body>
+    <div class="container">
+        <h1>Tic Tac Toe By Ruman</h1>
+        <div id="scoreboard">
+            <span id="playerX">Player X: 0</span>
+            <span id="playerO">Player O: 0</span>
+        </div>
+        <div id="board" class="board">
+            <!-- The board will be generated dynamically using JavaScript -->
+        </div>
+        <div id="game-over-popup" class="popup hidden">
+            <p id="winner-message"></p>
+            <button id="restart-button">Restart</button>
+        </div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const board = document.getElementById('board');
+            const cells = Array.from({ length: 9 }, (_, index) => createCell(index));
+            const scoreboard = {
+                playerX: 0,
+                playerO: 0,
+            };
+            let currentPlayer = 'X';
+            let gameActive = true;
+
+            cells.forEach(cell => board.appendChild(cell));
+
+            board.addEventListener('click', handleCellClick);
+            document.getElementById('restart-button').addEventListener('click', restartGame);
+
+            function createCell(index) {
+                const cell = document.createElement('div');
+                cell.classList.add('cell');
+                cell.dataset.index = index;
+                return cell;
+            }
+
+            function handleCellClick(event) {
+                const clickedCell = event.target;
+                const index = clickedCell.dataset.index;
+
+                if (gameActive && !clickedCell.textContent) {
+                    clickedCell.textContent = currentPlayer;
+                    if (checkWin()) {
+                        showGameOverPopup(`${currentPlayer} wins!`);
+                        updateScore(currentPlayer);
+                    } else if (checkDraw()) {
+                        showGameOverPopup("It's a draw!");
+                    } else {
+                        currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+                    }
+                }
+            }
+
+            function checkWin() {
+                const winConditions = [
+                    [0, 1, 2],
+                    [3, 4, 5],
+                    [6, 7, 8],
+                    [0, 3, 6],
+                    [1, 4, 7],
+                    [2, 5, 8],
+                    [0, 4, 8],
+                    [2, 4, 6],
+                ];
+
+                return winConditions.some(condition => {
+                    const [a, b, c] = condition;
+                    return cells[a].textContent && cells[a].textContent === cells[b].textContent && cells[a].textContent === cells[c].textContent;
+                });
+            }
+
+            function checkDraw() {
+                return cells.every(cell => cell.textContent);
+            }
+
+            function showGameOverPopup(message) {
+                gameActive = false;
+                const popup = document.getElementById('game-over-popup');
+                const winnerMessage = document.getElementById('winner-message');
+                winnerMessage.textContent = message;
+                popup.classList.remove('hidden');
+            }
+
+            function restartGame() {
+                cells.forEach(cell => {
+                    cell.textContent = '';
+                });
+
+                gameActive = true;
+                const popup = document.getElementById('game-over-popup');
+                popup.classList.add('hidden');
+            }
+
+            function updateScore(player) {
+                scoreboard[player]++;
+                document.getElementById('playerX').textContent = `Player X: ${scoreboard.playerX}`;
+                document.getElementById('playerO').textContent = `Player O: ${scoreboard.playerO}`;
+            }
+        });
+    </script>
+</body>
+</html>
